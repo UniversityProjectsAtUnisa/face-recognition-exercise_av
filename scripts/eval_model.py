@@ -13,7 +13,10 @@ from utils import (
 from train_model import (
     FaceRecognition,
     preprocessing,
-    feature_extraction
+    feature_extraction,
+    MODELS_DIR,
+    LABELS_FILENAME,
+    FEATURES_MODEL
 )
 
 if __name__ == '__main__':
@@ -25,11 +28,12 @@ if __name__ == '__main__':
     # Load the encoder
     labeler = Labeler(dataset_files)
 
-    if not os.path.exists('labels.pkl'):
+    labeler_path = os.path.join(MODELS_DIR, LABELS_FILENAME)
+    if not os.path.exists(labeler_path):
         print("WARNING: A new labels file has been created. Check the working directory.")
-        labeler.save()
+        labeler.save(output_path=labeler_path)
     else:
-        labeler.load()
+        labeler.load(input_path=labeler_path)
 
     # Load the files and apply the preprocessing function
     evaluation_set = 'val'
@@ -38,7 +42,7 @@ if __name__ == '__main__':
         evaluation_path, dataset_files[evaluation_set], labeler, preprocessing)
 
     # Compute features
-    with open('features_model.pkl', 'rb') as file:
+    with open(os.path.join(MODELS_DIR, FEATURES_MODEL), 'rb') as file:
         feature_extration_model = pk.load(file)
     Xt, _ = feature_extraction(X_test, model=feature_extration_model)
 
@@ -75,4 +79,3 @@ if __name__ == '__main__':
     print("F1 Score (considering just known/unknown): ", f1score)
     print("Precision (considering just known/unknown): ", precision)
     print("Recall (considering just known/unknown): ", recall)
-
